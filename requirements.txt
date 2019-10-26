@@ -1,0 +1,2 @@
+pip3 install --upgrade PySimpleGUI 
+sudo apt-get install python-tk
