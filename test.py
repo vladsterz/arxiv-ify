@@ -1,16 +1,16 @@
-import arxiv
 import time
 
-from source.utilities import get_entries_by_date
+#from src.utilities import get_entries_by_date
+from src.arxiv.queries_manager import ArxivManager
+from src.gui.gui import ArxivEntriesManager
 def main():
-    query_result = arxiv.query(search_query="cs.GR", sort_by="submittedDate", max_results=10)
-    today = time.gmtime()
-    today[2] -= 3
-    get_entries_by_date(query_result, today)
-    print("\n\n\n")
-    query_result = arxiv.query(search_query="cs.GR", sort_by="submittedDate", max_results=10, start = 1)
+    man = ArxivManager()
+    man.do_query(field = "cs.CV")
 
-    get_entries_by_date(query_result, today)
+    works = man.get_by_date(2019,10,24)
+
+    manager = ArxivEntriesManager(10, works)
+    manager.top.mainloop()
 
     breakpoint = True
 
