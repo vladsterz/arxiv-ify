@@ -7,7 +7,11 @@ def main():
     man = ArxivManager()
     man.do_query(field = "cs.CV")
 
+
     works = man.get_by_date(2019,10,24)
+    while not works:
+        man.do_query(field = "cs.CV")
+        works = man.get_by_date(2019,10,24)
 
     manager = ArxivEntriesManager(10, works)
     manager.top.mainloop()

@@ -1,4 +1,4 @@
 pip3 install --upgrade PySimpleGUI 
 sudo apt-get install python-tk
 pip3 install kivy
-
+pip3 install scholarly

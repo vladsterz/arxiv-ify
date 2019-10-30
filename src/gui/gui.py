@@ -2,6 +2,39 @@ from tkinter import *
 import os
 import webbrowser
 import arxiv
+import scholarly
+
+class ImageButton:
+    def __init__(
+        self,
+        path_to_img         : str,
+        width               : int,
+        height              : int,
+        command             , #pressed callback
+        master
+    ):
+        if not os.path.exists(path_to_img):
+            photo = None
+            self.button = None
+            raise Exception("{} not found".format(path_to_img))
+        else:
+            photo = PhotoImage(
+                master = master,
+                file = path_to_img)
+            
+            photo = photo.subsample(
+                photo.width() // width,
+                photo.height() // height)
+
+            self.button = Button(
+                master = master,
+                command = command
+            )
+
+            self.button.img = photo
+            self.button.config(image = photo)
+
+        
 
 class ArxivEntriesManager:
     def __init__(
@@ -20,7 +53,7 @@ class ArxivEntriesManager:
                 500,
                 self.top
             )
-            self.entries.append(w)
+            self.entries_gui.append(w)
 
 
 class ArxivEntryGui:
@@ -44,57 +77,61 @@ class ArxivEntryGui:
 
     def is_pressed(self):
         self.box = Tk(className=self.entry['title'])
-        text = self.entry['summary']
-        self.w = Text(self.box)
-        self.w.pack()
-        self.w.insert(END, text)
+        
+        # self.header = Text(self.box)
+        # self.header.pack()
+        # self.header.insert(END, self.entry['title'])
+        #TODO: Add this later plz
+        #self.header.config(font = ('Courier' , 26), height = 2)
+
+        # self.authors = Text(self.box)
+        # self.authors.pack()
+
+        #TODO: I think that authors are in some other order that paper's
+        authors_links = list()
+        for author in self.entry['authors']:
+            data = scholarly.search_author(author)
+
+            label = Label(self.box, text=author, fg="blue" if data else "black", cursor="hand2")
+            #label.pack(LEFT)
+            authors_links.append(label)
+            if data:
+                scholar_link = "https://scholar.google.com/citations?user={}".format(next(data).id)
+                authors_links[-1].bind("<Button-1>", lambda e: webbrowser.open_new_tab(scholar_link))
+
+        # text = self.entry['summary']
+        # self.w = Text(self.box)
+        # self.w.pack()
+        # self.w.insert(END, text)
 
         photo_img_w = 40
         photo_img_h = 40
 
-        #TODO: fix this getcwd
+         #TODO: fix this getcwd
         file = os.path.join(os.getcwd(),"data/gui_data/arxiv.png")
-        if os.path.exists(file):
-            arxiv_photo = PhotoImage(
-                master = self.box,
-                file = file)
-            
-            arxiv_photo = arxiv_photo.subsample(
-                arxiv_photo.width() // photo_img_w,
-                arxiv_photo.height() // photo_img_h)
-        else:
-            arxiv_photo = None
-        
-        arxiv_button = Button(
-            master = self.box,
-            command = lambda : webbrowser.open_new_tab(self.entry['arxiv_url'])
+        command = lambda : webbrowser.open_new_tab(self.entry['arxiv_url'])
+        pdf_button = ImageButton(
+            path_to_img     =   file,
+            width           =   photo_img_w,
+            height          =   photo_img_h,
+            command         =   command,
+            master          =   self.box
         )
-        arxiv_button.img = arxiv_photo
-        arxiv_button.config(image = arxiv_photo)
-        arxiv_button.pack(side = LEFT)
+        pdf_button.button.pack(side = LEFT)
 
          #TODO: fix this getcwd
         file = os.path.join(os.getcwd(),"data/gui_data/pdf.png")
-        if os.path.exists(file):
-            pdf_photo = PhotoImage(
-                master = self.box,
-                file = file)
-            
-            pdf_photo = pdf_photo.subsample(
-                pdf_photo.width() // photo_img_w,
-                pdf_photo.height() // photo_img_h)
-        else:
-            pdf_photo = None
-        
-        pdf_button = Button(
-            master = self.box,
-            command = lambda : webbrowser.open_new_tab(self.entry['pdf_url'])
+        command = lambda : webbrowser.open_new_tab(self.entry['pdf_url'])
+        pdf_button = ImageButton(
+            path_to_img     =   file,
+            width           =   photo_img_w,
+            height          =   photo_img_h,
+            command         =   command,
+            master          =   self.box
         )
-        pdf_button.img = pdf_photo
-        pdf_button.config(image = pdf_photo)
-        pdf_button.pack(side = LEFT)
+        pdf_button.button.pack(side = LEFT)
 
-        arxiv.download(self.entry)
+        #arxiv.download(self.entry)
         
 
 
